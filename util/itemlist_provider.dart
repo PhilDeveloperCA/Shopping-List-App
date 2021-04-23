@@ -8,6 +8,7 @@ class Item {
   int id;
   String username;
   String name;
+  String description;
   double cost = 0.00;
   int quantity = 0;
   Item(this.id, this.username, this.name);
@@ -15,6 +16,7 @@ class Item {
     this.id = jsonMap['id'];
     this.username = jsonMap['username'];
     this.name = jsonMap['name'];
+    this.description = jsonMap['description'];
   }
 }
 
@@ -63,14 +65,23 @@ class ItemProvider extends ChangeNotifier {
 
   void addItem(String name, String description) async {
     try {
-      var response = await client
-          .get(Uri.http(ItemProvider.base_url, '/items/add/${list_id}', {
-        'name': name,
-        'description': description,
-      }));
+      var response = await client.get(
+        Uri.http(
+          ItemProvider.base_url,
+          '/items/add/${list_id}',
+          {
+            'name': name,
+            'description': description,
+          },
+        ),
+        headers: {
+          'Authorization': jwt,
+        },
+      );
       var newItemJson = jsonDecode(response.body);
       Item newItem = Item.fromJson(newItemJson);
       this.items = [...items, newItem];
+      print(items);
     } catch (err) {
       print(err);
     }

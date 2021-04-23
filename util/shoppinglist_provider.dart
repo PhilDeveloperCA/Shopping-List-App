@@ -82,5 +82,23 @@ class ShoppingListProvider extends ChangeNotifier {
     }
   }
 
+  inviteUser(String username) async {
+    try {
+      await client.get(
+          new Uri.http(
+            ShoppingListProvider.base_url,
+            '/group/invite/send/${group_id}',
+            {
+              'username': username,
+            },
+          ),
+          headers: {
+            'Authorization': jwt,
+          });
+    } catch (err) {
+      print(err);
+    }
+  }
+
   editShoppingList() {}
 }

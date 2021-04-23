@@ -4,8 +4,31 @@ import 'package:provider/provider.dart';
 import 'package:shopping_client/auth_provider.dart';
 import 'package:shopping_client/util/group_provider.dart';
 import 'package:shopping_client/util/route_info.dart';
+import 'dart:async';
 
 class Home extends StatelessWidget {
+  static final _groupNameStream = new StreamController<String>();
+  String name;
+
+  @override
+  void dispose() {
+    _groupNameStream.close();
+  }
+
+  static final nameValidator = StreamTransformer<String, String>.fromHandlers(
+    handleData: (value, sink) => {
+      if (value.length > 3)
+        {sink.add(value)}
+      else
+        sink.addError('Group Must Be At least 4 characters')
+    },
+  );
+
+  Stream<String> get getName =>
+      _groupNameStream.stream.transform(nameValidator);
+  Function(String) get changeName => _groupNameStream.sink.add;
+
+  @override
   @override
   Widget build(BuildContext context) {
     final authstate = Provider.of<AuthProvider>(context);
@@ -21,43 +44,88 @@ class Home extends StatelessWidget {
         builder: (context, child) => GroupWidget(context),
       );
   }
-}
 
-Widget GroupWidget(context) {
-  final groups =
-      Provider.of<GroupProvider>(context, listen: false).groups.length;
+  Widget GroupWidget(context) {
+    final groups = Provider.of<GroupProvider>(context, listen: false);
 
-  return Scaffold(
-    appBar: AppBar(
-      title: Text('Your Apps'),
-    ),
-    body: Column(
-      children: [
-        SizedBox(
-          height: 500,
-          child: ListView.builder(
-            itemCount: Provider.of<GroupProvider>(context).groups.length,
-            itemBuilder: (context, index) => Row(
-              children: [
-                Text(Provider.of<GroupProvider>(context).groups[index].name),
-                FloatingActionButton.extended(
-                  icon: Icon(Icons.details),
-                  label: Text('Details'),
-                  onPressed: () async {
-                    print('here');
-                    await Navigator.pushNamed(context, RouteNames.group,
-                        arguments:
-                            Provider.of<GroupProvider>(context, listen: false)
-                                .groups[index]);
-                  },
-                )
-              ],
-            ),
+    //final Stream
+    Future<void> _showDialog() {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          content: Stack(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.only(bottom: 25.0),
+                child: InkResponse(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: CircleAvatar(
+                    child: Icon(Icons.close),
+                  ),
+                ),
+              ),
+              StreamBuilder(
+                  builder: (context, name) => Container(
+                        padding: EdgeInsets.only(top: 40.0),
+                        child: Column(
+                          children: [
+                            TextField(
+                              onChanged: changeName,
+                              decoration: InputDecoration(
+                                  labelText: 'group name',
+                                  errorText: name.error),
+                            ),
+                            FloatingActionButton(onPressed: () async {
+                              if (name.error == null) {
+                                groups.createGroup(name.data);
+                                Navigator.pop(context);
+                              }
+                            })
+                          ],
+                        ),
+                      ),
+                  stream: getName),
+            ],
           ),
-        )
-      ],
-    ),
-  );
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Your Groups'),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.add), onPressed: _showDialog)
+        ],
+      ),
+      body: Column(
+        children: [
+          SizedBox(
+            height: 500,
+            child: ListView.builder(
+              itemCount: Provider.of<GroupProvider>(context).groups.length,
+              itemBuilder: (context, index) => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(Provider.of<GroupProvider>(context).groups[index].name),
+                  FloatingActionButton.extended(
+                    icon: Icon(Icons.details),
+                    label: Text('Details'),
+                    onPressed: () async {
+                      await Navigator.pushNamed(context, RouteNames.group,
+                          arguments:
+                              Provider.of<GroupProvider>(context, listen: false)
+                                  .groups[index]);
+                    },
+                  )
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
 }
 
 class Auth extends StatefulWidget {

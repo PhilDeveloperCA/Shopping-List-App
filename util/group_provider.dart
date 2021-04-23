@@ -42,7 +42,6 @@ class GroupProvider extends ChangeNotifier {
       var body = jsonDecode(response.body).cast<Map<String, dynamic>>();
       this.groups =
           body.map<Group>((bodyMap) => Group.fromJson(bodyMap)).toList();
-      print(groups);
       notifyListeners();
     }
   }
@@ -54,9 +53,20 @@ class GroupProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  createGroup() async {
-    var respone =
-        await client.get(new Uri.http(GroupProvider.base_url, '/group/g'));
+  createGroup(dynamic name) async {
+    try {
+      var response = await client.get(
+        new Uri.http(GroupProvider.base_url, '/group/create', {
+          'name': name,
+        }),
+        headers: {
+          'Authorization': jwt,
+        },
+      );
+      groups.add(Group.fromJson(jsonDecode(response.body)));
+    } catch (err) {
+      print(err);
+    }
   }
 
   deleteGroup() async {}

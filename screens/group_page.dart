@@ -13,6 +13,15 @@ class GroupPage extends StatefulWidget {
 }
 
 class _GroupPageState extends State<GroupPage> {
+  String username;
+  final _usernameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -23,10 +32,59 @@ class _GroupPageState extends State<GroupPage> {
 
   Widget BodyWidget(context) {
     final list = Provider.of<ShoppingListProvider>(context);
-    print(list.lists);
+    final _formKey = GlobalKey<FormState>();
+    //final Stream
+    Future<void> _showDialog() {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          content: Stack(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.only(bottom: 25.0),
+                child: InkResponse(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: CircleAvatar(
+                    child: Icon(Icons.close),
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 40.0),
+                child: Form(
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        validator: (value) =>
+                            value.length > 5 ? null : 'Enter Valid Username',
+                        onChanged: (value) => setState(() => username = value),
+                        controller: _usernameController,
+                        decoration: InputDecoration(
+                          hintText: 'enter user',
+                          labelText: 'Invite User by Username',
+                        ),
+                      ),
+                      FloatingActionButton(onPressed: () {
+                        if (_formKey.currentState.validate()) {
+                          list.inviteUser(username);
+                        }
+                      })
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.group.name),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.people), onPressed: _showDialog)
+        ],
       ),
       body: Column(
         children: [
