@@ -50,7 +50,6 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
 
   BodyWidget(context) {
     final items = Provider.of<ItemProvider>(context);
-    print(items.username);
     void Submit() {
       if (_formKey.currentState.validate()) {
         items.addItem(name, description);
@@ -104,9 +103,46 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
       );
     }
 
+    Future<void> _confirmDelete() {
+      return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          content: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              InkResponse(
+                onTap: () => Navigator.of(context).pop(),
+                child: CircleAvatar(
+                  child: Icon(Icons.close),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 100),
+                child: FloatingActionButton.extended(
+                  backgroundColor: Colors.red[500],
+                  onPressed: () {
+                    items.deleteShoppingList();
+                    Navigator.pushNamed(context, '/');
+                  },
+                  icon: Icon(Icons.delete),
+                  label: Text('Are you Sure you Want To Delete This List?'),
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.list.name),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: _confirmDelete,
+          )
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

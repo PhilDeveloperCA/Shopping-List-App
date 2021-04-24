@@ -94,6 +94,7 @@ class Home extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Your Groups'),
+        automaticallyImplyLeading: false,
         actions: <Widget>[
           IconButton(icon: Icon(Icons.add), onPressed: _showDialog)
         ],
@@ -190,52 +191,61 @@ class _AuthState extends State<Auth> {
       ),
       body: Column(
         children: [
-          Column(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text('Existing User ?'),
-              FloatingActionButton(
-                onPressed: () {
-                  setState(() {
-                    index = 0;
-                  });
-                },
-                child: Text('Sign In'),
-              )
-            ],
-          ),
-          Column(
-            children: [
-              Text('New ?'),
-              FloatingActionButton(
-                onPressed: () {
-                  setState(() {
-                    index = 1;
-                  });
-                },
-                child: Text('Sign Up'),
-              )
+              Column(
+                children: [
+                  //Text('Existing User ?'),
+                  FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        index = 0;
+                      });
+                    },
+                    child: Text('Sign In'),
+                  )
+                ],
+              ),
+              Column(
+                children: [
+                  //Text('New ?'),
+                  FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        index = 1;
+                      });
+                    },
+                    child: Text('Sign Up'),
+                  )
+                ],
+              ),
             ],
           ),
           Form(
-            child: Column(
-              children: [
-                TextFormField(
-                  validator: (value) => value.length > 6 && value.length < 20
-                      ? null
-                      : 'Enter a Username of at least 6 Characters',
-                  controller: _usernameController,
-                ),
-                TextFormField(
-                  controller: _passwordController,
-                  validator: (value) => value.length > 6 && value.length < 250
-                      ? null
-                      : 'Enter a Passsword of at least 6 characters',
-                ),
-                FloatingActionButton(
-                  onPressed: submit,
-                  child: Text('Submit'),
-                )
-              ],
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 150.0, vertical: 30.0),
+              child: Column(
+                children: [
+                  TextFormField(
+                    validator: (value) => value.length > 6 && value.length < 20
+                        ? null
+                        : 'Enter a Username of at least 6 Characters',
+                    controller: _usernameController,
+                  ),
+                  TextFormField(
+                    controller: _passwordController,
+                    validator: (value) => value.length > 6 && value.length < 250
+                        ? null
+                        : 'Enter a Passsword of at least 6 characters',
+                  ),
+                  Padding(padding: EdgeInsets.only(top: 40.0)),
+                  FloatingActionButton(
+                    onPressed: submit,
+                    child: Text('Submit'),
+                  )
+                ],
+              ),
             ),
           )
         ],

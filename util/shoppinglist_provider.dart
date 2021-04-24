@@ -3,22 +3,34 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:html';
 
+class User {
+  String username;
+  int id;
+  User.fromJson(Map<String, dynamic> jsonMap) {
+    this.id = jsonMap['id'];
+    this.username = jsonMap['username'];
+  }
+}
+
 class ShoppingList {
   String name;
   //date
   String creator;
   int id;
+  int group_id;
   ShoppingList(this.id, this.name, this.creator);
   ShoppingList.fromJson(Map<String, dynamic> jsonMap) {
     this.id = jsonMap['id'];
     this.name = jsonMap['name'];
     this.creator = jsonMap['username'];
+    this.group_id = jsonMap['group_id'];
   }
 }
 
 class ShoppingListProvider extends ChangeNotifier {
   int group_id;
   List<ShoppingList> lists = [];
+  List<User> users;
 
   static const base_url = "192.168.1.122:5000";
   var client = http.Client();
@@ -45,6 +57,16 @@ class ShoppingListProvider extends ChangeNotifier {
       this.lists = body
           .map<ShoppingList>((bodyMap) => ShoppingList.fromJson(bodyMap))
           .toList();
+      var usersresponse = await client.get(
+        Uri.http(ShoppingListProvider.base_url, '/group/users/${group_id}'),
+        headers: {
+          'Authorization': jwt,
+        },
+      );
+      var userbody =
+          jsonDecode(usersresponse.body).cast<Map<String, dynamic>>();
+      this.users =
+          userbody.map<User>((bodyMap) => User.fromJson(bodyMap)).toList();
       notifyListeners();
     }
   }
@@ -80,6 +102,16 @@ class ShoppingListProvider extends ChangeNotifier {
     } catch (err) {
       print(err);
     }
+  }
+
+  deleteGroup() async {
+    try {
+      var response = await client.get(
+          Uri.http(ShoppingListProvider.base_url, '/groups/delete/${group_id}'),
+          headers: {
+            'Authorization': jwt,
+          });
+    } catch (err) {}
   }
 
   inviteUser(String username) async {

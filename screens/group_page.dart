@@ -15,10 +15,13 @@ class GroupPage extends StatefulWidget {
 class _GroupPageState extends State<GroupPage> {
   String username;
   final _usernameController = TextEditingController();
+  String listname;
+  final _listnameController = TextEditingController();
 
   @override
   void dispose() {
     _usernameController.dispose();
+    _listnameController.dispose();
     super.dispose();
   }
 
@@ -33,8 +36,10 @@ class _GroupPageState extends State<GroupPage> {
   Widget BodyWidget(context) {
     final list = Provider.of<ShoppingListProvider>(context);
     final _formKey = GlobalKey<FormState>();
+    final _formKey2 = GlobalKey<FormState>();
     //final Stream
-    Future<void> _showDialog() {
+
+    _showDialog() {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -64,6 +69,7 @@ class _GroupPageState extends State<GroupPage> {
                           labelText: 'Invite User by Username',
                         ),
                       ),
+                      Padding(padding: EdgeInsets.only(top: 20.0)),
                       FloatingActionButton(onPressed: () {
                         if (_formKey.currentState.validate()) {
                           list.inviteUser(username);
@@ -73,6 +79,101 @@ class _GroupPageState extends State<GroupPage> {
                   ),
                 ),
               ),
+              Container(
+                padding: EdgeInsets.only(top: 200),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: list.users
+                      .map((user) => Container(
+                            padding: EdgeInsets.symmetric(vertical: 10.0),
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                              color: Colors.blue,
+                              width: 4,
+                            )),
+                            child: Row(children: [
+                              Text(user.username),
+                              user.username == widget.group.admin
+                                  ? Icon(Icons.group)
+                                  : Container(),
+                            ]),
+                          ))
+                      .toList(),
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    }
+
+    _showDeleteDialog() {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          clipBehavior: Clip.hardEdge,
+          content: Stack(
+            children: [
+              Container(
+                padding: EdgeInsets.only(bottom: 35.0),
+                child: InkResponse(
+                    child: CircleAvatar(
+                      child: Icon(Icons.close),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    }),
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 70),
+                child: FloatingActionButton.extended(
+                    backgroundColor: Colors.red[500],
+                    onPressed: () async {
+                      await list.deleteGroup();
+                      Navigator.pushNamed(context, '/');
+                    },
+                    label: Text('Are you Sure you want to leave this group'),
+                    icon: Icon(Icons.delete)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    _showShoppingForm() {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          content: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: <Widget>[
+              Container(
+                child: InkResponse(
+                    child: Icon(Icons.close), onTap: Navigator.of(context).pop),
+              ),
+              Container(
+                child: Form(
+                  key: _formKey2,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        validator: (value) =>
+                            value.length > 3 ? 'Enter Valid List Name' : null,
+                        controller: _listnameController,
+                      ),
+                      FloatingActionButton(
+                          onPressed: () async {
+                            if (_formKey2.currentState.validate()) {
+                              await list
+                                  .addShoppingList(_listnameController.text);
+                            }
+                          },
+                          child: Text('Submit'))
+                    ],
+                  ),
+                ),
+              )
             ],
           ),
         ),
@@ -83,7 +184,17 @@ class _GroupPageState extends State<GroupPage> {
       appBar: AppBar(
         title: Text(widget.group.name),
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.people), onPressed: _showDialog)
+          IconButton(icon: Icon(Icons.people), onPressed: _showDialog),
+          widget.group.admin == list.username
+              ? IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: _showDeleteDialog,
+                )
+              : Container(),
+          IconButton(
+            icon: Icon(Icons.shopping_cart),
+            onPressed: _showShoppingForm,
+          )
         ],
       ),
       body: Column(

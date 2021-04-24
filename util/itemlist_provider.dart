@@ -86,6 +86,19 @@ class ItemProvider extends ChangeNotifier {
       print(err);
     }
   }
+
+  deleteShoppingList() async {
+    try {
+      var response = await client.get(
+        Uri.http(ItemProvider.base_url, '/lists/delete/${list_id}'),
+        headers: {
+          'Authorization': jwt,
+        },
+      );
+    } catch (err) {
+      print(err);
+    }
+  }
 }
 
 /*void _init(group_id) async {

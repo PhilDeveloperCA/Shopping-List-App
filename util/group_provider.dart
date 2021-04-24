@@ -6,6 +6,7 @@ import 'dart:html';
 
 class Group {
   String name;
+  String admin;
   //Date Later
   // List<String> group_members;
   int id;
@@ -14,6 +15,7 @@ class Group {
   Group.fromJson(Map<String, dynamic> jsonMap) {
     this.id = jsonMap['id'] as int;
     this.name = jsonMap['name'] as String;
+    this.admin = jsonMap['admin'] as String;
   }
 }
 
@@ -68,6 +70,8 @@ class GroupProvider extends ChangeNotifier {
       print(err);
     }
   }
+
+  leaveGroup() async {}
 
   deleteGroup() async {}
 }
