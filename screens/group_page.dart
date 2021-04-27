@@ -206,8 +206,13 @@ class _GroupPageState extends State<GroupPage> {
               itemBuilder: (context, index) => Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(list.lists[index].name),
-                  Text(list.lists[index].creator),
+                  Text(list.lists[index].name == null
+                      ? ''
+                      : list.lists[index].name),
+                  Align(
+                    child: Text(list.lists[index].creator),
+                    alignment: Alignment.centerLeft,
+                  ),
                   FloatingActionButton.extended(
                     onPressed: () {
                       Navigator.pushNamed(context, RouteNames.shopping,

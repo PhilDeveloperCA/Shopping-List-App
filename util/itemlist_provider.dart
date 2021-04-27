@@ -9,20 +9,29 @@ class Item {
   String username;
   String name;
   String description;
-  double cost = 0.00;
-  int quantity = 0;
+  //double cost = 0.00;
+  //int quantity = 0;
+  bool bought = false;
+  dynamic category1;
+  dynamic category2;
   Item(this.id, this.username, this.name);
   Item.fromJson(Map<String, dynamic> jsonMap) {
     this.id = jsonMap['id'];
     this.username = jsonMap['username'];
     this.name = jsonMap['name'];
     this.description = jsonMap['description'];
+    this.category1 = jsonMap['category1'];
+    this.category2 = jsonMap['category2'];
   }
 }
 
 class ItemProvider extends ChangeNotifier {
   int list_id;
   List<Item> items = [];
+  String _selectedCategory = '';
+  List<String> categories = [];
+
+  var categorySet = <String>{};
 
   static const base_url = "192.168.1.122:5000";
   var client = http.Client();
@@ -45,6 +54,16 @@ class ItemProvider extends ChangeNotifier {
     );
     var body = jsonDecode(response.body).cast<Map<String, dynamic>>();
     this.items = body.map<Item>((bodyMap) => Item.fromJson(bodyMap)).toList();
+    for (Item item in items) {
+      if (item.category1 != null) {
+        categorySet.add(item.category1);
+      }
+      if (item.category2 != null) {
+        categorySet.add(item.category2);
+      }
+    }
+    categories.addAll(categorySet);
+    print(categories);
     notifyListeners();
   }
 
@@ -62,6 +81,15 @@ class ItemProvider extends ChangeNotifier {
       print(err);
     }
   }
+
+  void checkBought(int id, bool truth) async {
+    Item item = items.firstWhere((element) => element.id == id);
+    item.bought = truth;
+    notifyListeners();
+  }
+
+  get boughtItems => items.where((element) => element.bought).toList();
+  get unBoughtItems => items.where((element) => !element.bought).toList();
 
   void addItem(String name, String description) async {
     try {

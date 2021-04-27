@@ -110,8 +110,8 @@ class Home extends StatelessWidget {
                 children: [
                   Text(Provider.of<GroupProvider>(context).groups[index].name),
                   FloatingActionButton.extended(
-                    icon: Icon(Icons.details),
-                    label: Text('Details'),
+                    icon: Icon(Icons.shopping_cart),
+                    label: Text('See Shopping Lists'),
                     onPressed: () async {
                       await Navigator.pushNamed(context, RouteNames.group,
                           arguments:
